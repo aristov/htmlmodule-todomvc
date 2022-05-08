@@ -3,7 +3,7 @@
 > htmlmodule is a library to build UI.
 It's inspired from React and based on the same ideas.
 
-- [Demo](https://aristov.github.io/htmlmodule-todoapp)
+- [Demo](https://aristov.github.io/htmlmodule-todomvc)
 
 ## Resources
 
