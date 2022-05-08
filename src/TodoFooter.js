@@ -21,7 +21,7 @@ export class TodoFooter extends HtmlFooter
         children : [
           new HtmlLi(new HtmlA({
             href : '#/',
-            class : { selected : location.hash === '#/' },
+            class : { selected : !['#/active', '#/completed'].includes(location.hash) },
             children : 'All',
           })),
           new HtmlLi(new HtmlA({
