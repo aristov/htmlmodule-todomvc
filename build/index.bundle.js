@@ -785,7 +785,7 @@ class DomNode
   }
 
   /**
-   * @param {{}} state
+   * @param {{}} [state]
    */
   setState(state) {
     const prevState = Object.assign({}, this.state)
@@ -3479,7 +3479,7 @@ class TodoFooter extends htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlFooter
         children : [
           new htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlLi(new htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlA({
             href : '#/',
-            class : { selected : location.hash === '#/' },
+            class : { selected : !['#/active', '#/completed'].includes(location.hash) },
             children : 'All',
           })),
           new htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlLi(new htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlA({
