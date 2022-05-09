@@ -1,6 +1,6 @@
-# htmlmodule • [TodoMVC](https://todomvc.com)
+# HtmlModule • [TodoMVC](https://todomvc.com)
 
-> htmlmodule is a library to build UI.
+> HtmlModule is a library to build UI.
 It's inspired from React and based on the same ideas.
 
 - [Demo](https://aristov.github.io/htmlmodule-todomvc)

@@ -17,10 +17,6 @@
     "build": "webpack",
     "serve": "webpack serve"
   },
-  "dependencies": {
-    "todomvc-app-css": "^2.4.2",
-    "todomvc-common": "^1.0.5"
-  },
   "devDependencies": {
     "htmlmodule": "github:aristov/htmlmodule#morphdom",
     "webpack": "^5.72.0",
