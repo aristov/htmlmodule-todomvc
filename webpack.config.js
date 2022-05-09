@@ -3,7 +3,7 @@ module.exports = [
 		mode : 'none',
 		entry : './src/index.js',
 		output : {
-			publicPath : 'dist',
+			publicPath : '/dist',
 			filename : 'index.bundle.js',
 		},
 		devServer : {

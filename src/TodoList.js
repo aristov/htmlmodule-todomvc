@@ -13,7 +13,7 @@ export class TodoList extends HtmlUl
       if(location.hash === '#/completed' && !item.completed) {
         return null
       }
-      return new TodoItem({ item, id : 'ID' + item.id })
+      return new TodoItem({ item, key : 'ID' + item.id })
     })
   }
 }
