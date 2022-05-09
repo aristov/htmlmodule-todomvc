@@ -9,9 +9,6 @@ module.exports = [
 			publicPath : '/build/',
 			filename : 'index.bundle.js',
 		},
-		externals : {
-			window : 'window',
-		},
 		devServer : {
 			static : {
 				directory : __dirname,
