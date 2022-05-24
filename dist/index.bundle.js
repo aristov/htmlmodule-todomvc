@@ -10,10 +10,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TodoApp": () => (/* binding */ TodoApp)
 /* harmony export */ });
 /* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _TodoMain__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(14);
-/* harmony import */ var _TodoFooter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(18);
-/* harmony import */ var _TodoHeader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(19);
-/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(17);
+/* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(htmlmodule__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _TodoMain__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(20);
+/* harmony import */ var _TodoFooter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(24);
+/* harmony import */ var _TodoHeader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(25);
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(23);
 
 
 
@@ -56,15 +57,22 @@ class TodoApp extends htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlSection
 
 /***/ }),
 /* 2 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, exports, __webpack_require__) => {
 
 /**
  * @module htmlmodule
  * @author Vyacheslav Aristov <vv.aristov@gmail.com>
- * @see {@link https://www.w3.org/TR/html}
- * @see {@link https://html.spec.whatwg.org}
  */
-module.exports = __webpack_require__(3)
+exports = module.exports = __webpack_require__(3)
+
+exports.AttrType = __webpack_require__(6)
+exports.Dataset = __webpack_require__(5)
+exports.DomElem = __webpack_require__(7)
+exports.DomNode = __webpack_require__(9)
+exports.HtmlElem = __webpack_require__(4)
+exports.Style = __webpack_require__(19)
+
+exports.window = __webpack_require__(8)
 
 
 /***/ }),
@@ -831,7 +839,7 @@ exports.HtmlVideo.defineProps([
 
 const Dataset = __webpack_require__(5)
 const DomElem = __webpack_require__(7)
-const Style = __webpack_require__(13)
+const Style = __webpack_require__(19)
 
 /**
  * @see https://html.spec.whatwg.org/#htmlelement
@@ -842,24 +850,12 @@ class HtmlElem extends DomElem
   static prefix = 'Html'
 
   static namespace = 'http://www.w3.org/1999/xhtml'
-
-  /**
-   * @returns {number|null}
-   */
-  get tabIndex() {
-    return this.node.hasAttribute('tabindex') ? this.node.tabIndex : null
-  }
-
-  /**
-   * @param {number|null} tabIndex
-   */
-  set tabIndex(tabIndex) {
-    if(tabIndex === null) {
-      this.node.removeAttribute('tabindex')
-    }
-    else this.node.tabIndex = tabIndex
-  }
 }
+
+HtmlElem.defineAttrs([
+  Dataset,
+  Style,
+])
 
 HtmlElem.defineMethods([
   'blur',
@@ -867,13 +863,7 @@ HtmlElem.defineMethods([
   'focus',
 ])
 
-HtmlElem.defineAttrs([
-  Dataset,
-  Style,
-])
-
 HtmlElem.defineProps([
-  'isContentEditable',
   'offsetHeight',
   'offsetLeft',
   'offsetTop',
@@ -889,6 +879,7 @@ HtmlElem.defineProps([
   'innerText',
   'inputMode',
   'lang',
+  'tabIndex',
   'title',
   'translate',
 ], true)
@@ -901,8 +892,6 @@ module.exports = HtmlElem
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const AttrType = __webpack_require__(6)
-
-let undefined
 
 class Dataset extends AttrType
 {
@@ -925,14 +914,6 @@ class Dataset extends AttrType
         map[name] = dataset[name]
       }
     }
-  }
-
-  /**
-   * @param {DomElem} elem
-   * @returns {boolean}
-   */
-  static has(elem) {
-    return 'dataset' in elem.node
   }
 }
 
@@ -964,30 +945,6 @@ class AttrType
    */
   static set(elem, value) {
     elem.node.setAttribute(this.localName, value)
-  }
-
-  /**
-   * @param {DomElem} elem
-   * @returns {boolean}
-   */
-  static has(elem) {
-    return elem.node.hasAttribute(this.localName)
-  }
-
-  /**
-   * @param {DomElem} elem
-   */
-  static remove(elem) {
-    elem.node.removeAttribute(this.localName)
-  }
-
-  /**
-   * @param {DomElem} elem
-   * @param {*} value
-   * @returns {boolean}
-   */
-  static removeOnValue(elem, value) {
-    return value === null && !this.remove(elem)
   }
 
   /**
@@ -1032,25 +989,28 @@ class DomElem extends DomNode
    * @return {*|Element}
    */
   createNode() {
-    let name, constructor = this.constructor
+    let constructor = this.constructor
     const { prefix, namespace } = constructor
-    do if(constructor.name.startsWith(prefix)) {
-      name = constructor.name.slice(prefix.length)
+    do if(constructor.name?.startsWith(prefix)) {
+      const name = constructor.name.slice(prefix.length)
       return document.createElementNS(namespace, name.toLowerCase())
     }
     while(constructor = Object.getPrototypeOf(constructor))
-    return super.createNode()
+    throw Error(`Unable to resolve localName for "${ prefix }" prefix`)
   }
 
   /**
    * @param {boolean} deep
    */
   init(deep = false) {
-    super.init(deep)
     this.setClassName()
+    super.init(deep)
   }
 
   setClassName() {
+    if(this.props.className !== undefined) {
+      this.className = this.props.className
+    }
     if(this.className !== undefined) {
       if(this.className !== null) {
         this.node.className = this.className
@@ -1062,7 +1022,7 @@ class DomElem extends DomNode
     const classList = this.node.classList
     do {
       if(constructor.name.startsWith(prefix)) {
-        break
+        return
       }
       classList.add(constructor.name)
     }
@@ -1078,7 +1038,7 @@ class DomElem extends DomNode
    */
   getAttr(attr) {
     if(typeof attr === 'function') {
-      return attr.has(this)? attr.get(this) : attr.defaultValue
+      return attr.get(this)
     }
     return this.node.getAttribute(attr)
   }
@@ -1091,36 +1051,12 @@ class DomElem extends DomNode
    */
   setAttr(attr, value) {
     if(typeof attr === 'function') {
-      if(!attr.removeOnValue(this, value)) {
-        attr.set(this, value)
-      }
+      value === null || attr.set(this, value)
     }
     else if(value === null) {
       this.node.removeAttribute(attr)
     }
     else this.node.setAttribute(attr, value)
-  }
-
-  /**
-   * @param {constructor|string} attr
-   * @param {function} [attr.has]
-   * @returns {boolean}
-   */
-  hasAttr(attr) {
-    return typeof attr === 'function'?
-      attr.has(this) :
-      this.node.hasAttribute(attr)
-  }
-
-  /**
-   * @param {constructor|string} attr
-   * @param {function} [attr.remove]
-   */
-  removeAttr(attr) {
-    if(typeof attr === 'function') {
-      attr.remove(this)
-    }
-    else this.node.removeAttribute(attr)
   }
 
   /**
@@ -1148,9 +1084,9 @@ class DomElem extends DomNode
    */
   set attrs(attrs) {
     for(const [name, value] of Object.entries(attrs)) {
-      value === null?
-        this.removeAttr(name) :
-        this.setAttr(name, value)
+      value === null ?
+        this.node.removeAttribute(name) :
+        this.node.setAttribute(name, value)
     }
   }
 
@@ -1177,26 +1113,20 @@ class DomElem extends DomNode
   }
 
   /**
-   * @returns {DOMRect}
-   */
-  get rect() {
-    return this.node.getBoundingClientRect()
-  }
-
-  /**
    * @param {string[]|constructor[]} attrs
    */
   static defineAttrs(attrs) {
-    let attr, name
-    for(attr of attrs) {
-      name = typeof attr === 'string'? attr : attr.attrName
+    for(const attr of attrs) {
+      const name = typeof attr === 'string' ? attr : attr.attrName
       Object.defineProperty(this.prototype, name, {
         configurable : true,
         get() {
           return this.getAttr(attr)
         },
         set(value) {
-          this.setAttr(attr, value)
+          if(value !== undefined) {
+            this.setAttr(attr, value)
+          }
         },
       })
     }
@@ -1238,7 +1168,12 @@ module.exports = DomElem
 /* 8 */
 /***/ ((module) => {
 
+/**
+ * @module xwindow
+ * @author Vyacheslav Aristov <vv.aristov@gmail.com>
+ */
 if(typeof window === 'undefined') {
+  // Calling via eval() prevents jsdom extraction when using a module bundler
   const { JSDOM } = eval('require("jsdom")')
   const { window } = new JSDOM
   module.exports = window
@@ -1251,20 +1186,25 @@ else module.exports = window
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const window = __webpack_require__(8)
-const morph = __webpack_require__(10)
-const events = __webpack_require__(11)
+const actualize = __webpack_require__(10)
+const events = __webpack_require__(17)
 const {
   getKey,
-  nodeWillAppend,
-  nodeDidAppend,
+  nodeWillMount,
+  nodeDidMount,
   nodeWillUpdate,
-  childrenWillUpdate,
+  nodeDidUpdate,
   childrenDidUpdate,
-  nodeWillRemove,
-} = __webpack_require__(12)
+  nodeWillUnmount,
+} = __webpack_require__(18)
 
-const SPECIAL_PROPS = ['node', 'children']
 const { CustomEvent, DocumentFragment, EventTarget, Node } = window
+const SPECIAL_PROPS = {
+  children : true,
+  className : true,
+  key : true,
+  node : true,
+}
 
 /**
  * @see https://dom.spec.whatwg.org/#interface-node
@@ -1279,15 +1219,16 @@ class DomNode
    */
   constructor(props = {}) {
     this.__handlers = new Map
-    this.__prevProps = null
     this.props = props = this.normalizeProps(props)
     this.node = props.node || this.createNode()
     this.node.__instance = this
-    this.setProps()
+    if(props.key) {
+      this.key = props.key
+    }
   }
 
   /**
-   * @param {*} props
+   * @param {*} [props]
    * @return {{}}
    */
   normalizeProps(props) {
@@ -1308,10 +1249,11 @@ class DomNode
   }
 
   /**
-   * @param {boolean} deep
+   * @param {boolean} [deep]
    * @returns {this}
    */
-  init(deep = false) {
+  init(deep) {
+    this.setProps()
     this.props.children = this.normalizeChildren(this.render())
     this.node.append(...this.props.children.map(child => {
       if(child.node) {
@@ -1320,30 +1262,23 @@ class DomNode
       }
       return child
     }))
-    return this
   }
 
   setProps() {
     let name, value
     for(name in this.props) {
-      if(!this.props.hasOwnProperty(name)) {
-        continue
-      }
       value = this.props[name]
-      if(SPECIAL_PROPS.includes(name) || value === undefined) {
+      if(SPECIAL_PROPS[name]) {
         continue
       }
       if(name in this) {
         this[name] = value
       }
-      else if(name in this.node) {
-        this.node[name] = value
-      }
     }
   }
 
   /**
-   * @param {*} children
+   * @param {*} [children]
    * @return {(*|DomNode|string)[]}
    */
   normalizeChildren(children) {
@@ -1362,22 +1297,23 @@ class DomNode
    */
   setState(state) {
     const prevState = Object.assign({}, this.state)
-    Object.assign(this.state, typeof state === 'function' ? state(this.state) : state)
-    this.props.children = this.normalizeChildren(this.render())
-    if(this.props.children.length) {
-      const fragment = new DocumentFragment
-      fragment.append(...this.props.children.map(child => child.node || child))
-      morph(this.node, fragment, {
-        childrenOnly : true,
-        getKey,
-        nodeWillAppend,
-        nodeDidAppend,
-        nodeWillUpdate,
-        childrenWillUpdate,
-        childrenDidUpdate,
-        nodeWillRemove,
-      })
+    const fragment = new DocumentFragment
+    if(typeof state === 'function') {
+      state = state(this.state)
     }
+    Object.assign(this.state, state)
+    this.props.children = this.normalizeChildren(this.render())
+    fragment.append(...this.props.children.map(child => child.node || child))
+    actualize(this.node, fragment, {
+      childrenOnly : true,
+      getKey,
+      nodeWillMount,
+      nodeDidMount,
+      nodeWillUpdate,
+      nodeDidUpdate,
+      childrenDidUpdate,
+      nodeWillUnmount,
+    })
     this.componentDidUpdate(this.props, prevState)
   }
 
@@ -1401,7 +1337,7 @@ class DomNode
   }
 
   /**
-   * @param {boolean} keepNode
+   * @param {boolean} [keepNode]
    */
   destroy(keepNode = false) {
     if(!this.node) {
@@ -1413,6 +1349,7 @@ class DomNode
     }
     for(const type of this.__handlers.keys()) {
       this.node[type] = null
+      this.__handlers.delete(type)
     }
     keepNode || this.node.remove()
     this.node.__instance = null
@@ -1452,13 +1389,15 @@ class DomNode
         configurable : true,
         set(callback) {
           if(callback) {
-            this.node[name] = e => callback(e, e.target.__instance)
+            this.node[name] = e => callback.call(this, e, e.target.__instance)
             this.__handlers.set(name, callback)
+            return
           }
-          else this.__handlers.delete(name)
+          this.node[name] = null
+          this.__handlers.delete(name)
         },
         get() {
-          return this.node[name]
+          return this.__handlers.get(name) || null
         },
       })
     }
@@ -1493,7 +1432,9 @@ class DomNode
       }
       if(setters) {
         desc.set = function(value) {
-          this.node[name] = value
+          if(value !== undefined) {
+            this.node[name] = value
+          }
         }
       }
       Object.defineProperty(this.prototype, name, desc)
@@ -1508,15 +1449,16 @@ class DomNode
   static render(props, parentNode) {
     const instance = new this(props)
     if(!parentNode) {
-      return instance.init(true)
+      instance.init(true)
+      return instance
     }
     const fragment = new DocumentFragment
     fragment.append(instance.node)
-    morph(parentNode, fragment, {
+    actualize(parentNode, fragment, {
       childrenOnly : true,
       getKey,
-      nodeWillAppend,
-      nodeDidAppend,
+      nodeWillMount,
+      nodeDidMount,
     })
     return instance
   }
@@ -1541,36 +1483,274 @@ module.exports = DomNode
 /* 10 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const window = __webpack_require__(8)
-const { Node } = window
-const { indexOf } = Array.prototype
+/**
+ * @module actualize
+ * @author Vyacheslav Aristov <vv.aristov@gmail.com>
+ * @see {@link https://github.com/aristov/actualize}
+ */
+module.exports = __webpack_require__(11)
 
-function morph(nodeA, nodeB, options = {}) {
-  options.getKey ??= getNodeId
-  if(options.childrenOnly) {
-    morphChildren(nodeA, nodeB, options)
-    return nodeA
+
+/***/ }),
+/* 11 */
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const setChildren = __webpack_require__(12)
+const updateNode = __webpack_require__(15)
+
+const getNodeId = node => node.id
+
+/**
+ * @param {*|Node} treeA node for updating
+ * @param {*|Node} treeB node to which `treeA` should be updated
+ * @param {{}} [options] actualize options
+ * @param {boolean} [options.childrenOnly] Update only the child nodes of the `treeA`, the element itself will be skipped. The default value is `false`.
+ * @param {function} [options.getKey] Called to get a custom key of the node in a child list.  The default value is `node.id`.
+ * @param {function} [options.nodeWillMount] Called before a node from the `B` tree is mounted to the `A` tree.
+ * @param {function} [options.nodeDidMount] Called after a node from the `B` tree has been mounted to the `A` tree.
+ * @param {function} [options.nodeWillUnmount] Called before a node in the `A` tree is unmounted.
+ * @param {function} [options.nodeDidUnmount] Called after a node in the `A` tree has been unmounted.
+ * @param {function} [options.nodeWillUpdate] Called before updating a node in the `A` tree.
+ * @param {function} [options.nodeDidUpdate] Called after updating a node in the `A` tree.
+ * @param {function} [options.childrenWillUpdate] Called before updating the child nodes of an element in the `A` tree.
+ * @param {function} [options.childrenDidUpdate] Called after updating the child nodes of an element in the `A` tree.
+ * @return {Element}
+ */
+function actualize(treeA, treeB, options = {}) {
+  if(!options.getKey) {
+    options.getKey = getNodeId
   }
-  morphNode(nodeA, nodeB, options)
-  return nodeA
+  if(options.childrenOnly) {
+    setChildren(treeA, treeB, options)
+    return treeA
+  }
+  return updateNode(treeA, treeB, options)
 }
 
-function morphNode(nodeA, nodeB, options) {
+module.exports = actualize
+
+
+/***/ }),
+/* 12 */
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = setChildren // avoiding empty exports for circular dependency
+
+const getKeyIndex = __webpack_require__(13)
+const setChildNodes = __webpack_require__(14)
+const updateNode = __webpack_require__(15)
+
+const { indexOf } = Array.prototype
+
+/**
+ * @param {*|Element} nodeA
+ * @param {*|Element} nodeB
+ * @param {{}} [options]
+ */
+function setChildren(nodeA, nodeB, options) {
+  const indexA = getKeyIndex(nodeA, options.getKey)
+  const indexB = getKeyIndex(nodeB, options.getKey)
+  if(!indexA || !indexB) {
+    setChildNodes(nodeA, nodeB, options)
+    return
+  }
   const {
+    getKey,
+    nodeWillMount,
+    nodeDidMount,
+    nodeWillUnmount,
+    nodeDidUnmount,
+  } = options
+  const childrenB = Array.from(nodeB.children)
+  let childA = nodeA.firstElementChild
+  let childB, nextA, i, j
+  while(childA) {
+    nextA = childA.nextElementSibling
+    if(!indexB[getKey(childA)]) {
+      nodeWillUnmount?.(childA)
+      childA.remove()
+      nodeDidUnmount?.(childA)
+    }
+    childA = nextA
+  }
+  for(i = 0; i < childrenB.length; i++) {
+    childB = childrenB[i]
+    childA = indexA[getKey(childB)]
+    if(childA) {
+      continue
+    }
+    nextA = nodeA.children[i]
+    nodeWillMount?.(childB)
+    if(nextA) {
+      nextA.before(childB)
+    }
+    else nodeA.append(childB)
+    nodeDidMount?.(childB)
+  }
+  for(i = 0; i < childrenB.length; i++) {
+    childB = childrenB[i]
+    childA = indexA[getKey(childB)]
+    if(!childA) {
+      continue
+    }
+    j = indexOf.call(nodeA.children, childA)
+    if(i === j) {
+      updateNode(childA, childB, options)
+      continue
+    }
+    nextA = nodeA.children[i].nextElementSibling
+    if(nextA) {
+      if(childA !== nextA && childA.nextElementSibling !== nextA) {
+        nextA.before(childA)
+      }
+    }
+    else nodeA.append(childA)
+    updateNode(childA, childB, options)
+  }
+}
+
+
+/***/ }),
+/* 13 */
+/***/ ((module) => {
+
+const ELEMENT_NODE = 1
+
+/**
+ * @param {Node} node
+ * @param {function} getKey
+ * @return {{}|null}
+ */
+function getKeyIndex(node, getKey) {
+  const index = {}
+  let child, key
+  for(child of node.childNodes) {
+    if(child.nodeType !== ELEMENT_NODE) {
+      return null
+    }
+    key = getKey(child)
+    if(!key) {
+      return null
+    }
+    index[key] = child
+  }
+  return index
+}
+
+module.exports = getKeyIndex
+
+
+/***/ }),
+/* 14 */
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const updateNode = __webpack_require__(15)
+
+/**
+ * @param {*|Element} nodeA
+ * @param {*|Element} nodeB
+ * @param {{}} [options]
+ */
+function setChildNodes(nodeA, nodeB, options) {
+  const {
+    nodeWillMount,
+    nodeDidMount,
+    nodeWillUnmount,
+    nodeDidUnmount,
+  } = options
+  const childNodesA = Array.from(nodeA.childNodes)
+  const childNodesB = Array.from(nodeB.childNodes)
+  const length = Math.max(childNodesA.length, childNodesB.length)
+  let i, childA, childB
+  for(i = 0; i < length; i++) {
+    childA = childNodesA[i]
+    childB = childNodesB[i]
+    if(!childA) {
+      nodeWillMount?.(childB)
+      nodeA.append(childB)
+      nodeDidMount?.(childB)
+      continue
+    }
+    if(!childB) {
+      nodeWillUnmount?.(childA)
+      childA.remove()
+      nodeDidUnmount?.(childA)
+      continue
+    }
+    updateNode(childA, childB, options)
+  }
+}
+
+module.exports = setChildNodes
+
+
+/***/ }),
+/* 15 */
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const setAttrs = __webpack_require__(16)
+const setChildren = __webpack_require__(12)
+
+const ELEMENT_NODE = 1
+const TEXT_NODE = 3
+
+/**
+ * @param {*|Node} nodeA
+ * @param {*|Node} nodeB
+ * @param {{}} [options]
+ * @retuns {Node}
+ */
+function updateNode(nodeA, nodeB, options) {
+  const {
+    getKey,
+    nodeWillMount,
+    nodeDidMount,
+    nodeWillUnmount,
+    nodeDidUnmount,
     nodeWillUpdate,
     nodeDidUpdate,
     childrenWillUpdate,
     childrenDidUpdate,
   } = options
-  nodeWillUpdate?.(nodeA, nodeB)
-  morphAttrs(nodeA, nodeB, options)
-  nodeDidUpdate?.(nodeA)
-  childrenWillUpdate?.(nodeA, nodeB)
-  morphChildren(nodeA, nodeB, options)
-  childrenDidUpdate?.(nodeA)
+  if(nodeA.nodeType === TEXT_NODE && nodeB.nodeType === TEXT_NODE) {
+    if(nodeA.data !== nodeB.data) {
+      nodeWillUpdate?.(nodeA, nodeB)
+      nodeA.data = nodeB.data
+      nodeDidUpdate?.(nodeA, nodeB)
+    }
+    return nodeA
+  }
+  if(nodeA.nodeType === ELEMENT_NODE && nodeB.nodeType === ELEMENT_NODE) {
+    if(nodeA.tagName === nodeB.tagName && getKey(nodeA) === getKey(nodeB)) {
+      nodeWillUpdate?.(nodeA, nodeB)
+      setAttrs(nodeA, nodeB)
+      nodeDidUpdate?.(nodeA, nodeB)
+      childrenWillUpdate?.(nodeA, nodeB)
+      setChildren(nodeA, nodeB, options)
+      childrenDidUpdate?.(nodeA, nodeB)
+      return nodeA
+    }
+  }
+  nodeWillUnmount?.(nodeA)
+  nodeWillMount?.(nodeB)
+  nodeA.replaceWith(nodeB)
+  nodeDidUnmount?.(nodeA)
+  nodeDidMount?.(nodeB)
+  return nodeB
 }
 
-function morphAttrs(nodeA, nodeB) {
+module.exports = updateNode
+
+
+/***/ }),
+/* 16 */
+/***/ ((module) => {
+
+/**
+ * @param {*|Element} nodeA
+ * @param {*|Element} nodeB
+ */
+function setAttrs(nodeA, nodeB) {
   const names = new Set
   let attr, value
   for(attr of nodeA.attributes) {
@@ -1601,154 +1781,11 @@ function morphAttrs(nodeA, nodeB) {
   }
 }
 
-function morphChildren(nodeA, nodeB, options) {
-  const indexA = getKeyIndex(nodeA, options.getKey)
-  const indexB = getKeyIndex(nodeB, options.getKey)
-  if(!indexA || !indexB) {
-    morphChildNodes(nodeA, nodeB, options)
-    return
-  }
-  const {
-    getKey,
-    nodeWillAppend,
-    nodeDidAppend,
-    nodeWillRemove,
-    nodeDidRemove,
-  } = options
-  const childrenB = Array.from(nodeB.children)
-  let childA = nodeA.firstElementChild
-  let childB, nextA, i, j
-  while(childA) {
-    nextA = childA.nextElementSibling
-    if(!indexB[getKey(childA)]) {
-      nodeWillRemove?.(childA)
-      childA.remove()
-      deep(childA, nodeDidRemove)
-    }
-    childA = nextA
-  }
-  for(i = 0; i < childrenB.length; i++) {
-    childB = childrenB[i]
-    childA = indexA[getKey(childB)]
-    if(childA) {
-      morphNode(childA, childB, options)
-      continue
-    }
-    nextA = nodeA.children[i]
-    nodeWillAppend?.(childB)
-    if(nextA) {
-      nextA.before(childB)
-    }
-    else nodeA.append(childB)
-    deep(childB, nodeDidAppend)
-  }
-  for(i = 0; i < childrenB.length; i++) {
-    childB = childrenB[i]
-    childA = indexA[getKey(childB)]
-    if(!childA) {
-      continue
-    }
-    j = indexOf.call(nodeA.children, childA)
-    if(i === j) {
-      continue
-    }
-    nextA = nodeA.children[i].nextElementSibling
-    if(nextA) {
-      if(childA !== nextA && childA.nextElementSibling !== nextA) {
-        nextA.before(childA)
-      }
-    }
-    else nodeA.append(childA)
-    morphNode(childA, childB, options)
-  }
-}
-
-function morphChildNodes(nodeA, nodeB, options) {
-  const {
-    getKey,
-    nodeWillAppend,
-    nodeDidAppend,
-    nodeWillUpdate,
-    nodeDidUpdate,
-    nodeWillRemove,
-    nodeDidRemove,
-  } = options
-  const childNodesA = Array.from(nodeA.childNodes)
-  const childNodesB = Array.from(nodeB.childNodes)
-  const length = Math.max(childNodesA.length, childNodesB.length)
-  let i, childA, childB
-  for(i = 0; i < length; i++) {
-    childA = childNodesA[i]
-    childB = childNodesB[i]
-    if(!childA) {
-      nodeWillAppend?.(childB)
-      nodeA.append(childB)
-      deep(childB, nodeDidAppend)
-      continue
-    }
-    if(!childB) {
-      nodeWillRemove?.(childA)
-      childA.remove()
-      deep(childA, nodeDidRemove)
-      continue
-    }
-    if(childA.nodeType === Node.TEXT_NODE && childB.nodeType === Node.TEXT_NODE) {
-      if(childA.data !== childB.data) {
-        nodeWillUpdate?.(childA, childB)
-        childA.data = childB.data
-        nodeDidUpdate?.(childA)
-      }
-      continue
-    }
-    if(childA.nodeType === childB.nodeType && childA.tagName === childB.tagName) {
-      if(getKey(childA) === getKey(childB)) {
-        morphNode(childA, childB, options)
-        continue
-      }
-    }
-    nodeWillRemove?.(childA)
-    nodeWillAppend?.(childB)
-    childA.replaceWith(childB)
-    deep(childA, nodeDidRemove)
-    deep(childB, nodeDidAppend)
-  }
-}
-
-function getNodeId(node) {
-  return node.id
-}
-
-function getKeyIndex(node, getKey) {
-  const index = {}
-  let child, key
-  for(child of node.childNodes) {
-    key = getKey(child)
-    if(!key) {
-      return null
-    }
-    index[key] = child
-  }
-  return index
-}
-
-function deep(node, handler) {
-  if(!handler) {
-    return
-  }
-  handler(node)
-  if(!node.children) {
-    return
-  }
-  for(const child of node.children) {
-    deep(child, handler)
-  }
-}
-
-module.exports = morph
+module.exports = setAttrs
 
 
 /***/ }),
-/* 11 */
+/* 17 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const window = __webpack_require__(8)
@@ -1796,8 +1833,18 @@ module.exports = {
 
 
 /***/ }),
-/* 12 */
+/* 18 */
 /***/ ((module) => {
+
+/**
+ * @param {DomElem|string} child
+ */
+const componentDidMount = child => {
+  if(child.node) {
+    child.componentDidMount()
+    child.props.children.forEach(componentDidMount)
+  }
+}
 
 module.exports = {
   /**
@@ -1808,16 +1855,16 @@ module.exports = {
     return node.__instance?.key || node.id
   },
   /**
-   * @param {ChildNode} nodeB
+   * @param {ChildNode|Element} nodeB
    */
-  nodeWillAppend(nodeB) {
+  nodeWillMount(nodeB) {
     nodeB.__instance?.init(true)
   },
   /**
-   * @param {ChildNode} nodeB
+   * @param {ChildNode|Element} nodeB
    */
-  nodeDidAppend(nodeB) {
-    nodeB.__instance?.componentDidMount()
+  nodeDidMount(nodeB) {
+    nodeB.__instance && componentDidMount(nodeB.__instance)
   },
   /**
    * @param {Element} nodeA
@@ -1826,60 +1873,61 @@ module.exports = {
   nodeWillUpdate(nodeA, nodeB) {
     const instanceA = nodeA.__instance
     const instanceB = nodeB.__instance
-    if(instanceB && instanceA) {
-      if(instanceA.constructor === instanceB.constructor) {
-        instanceB.state = instanceA.state
-      }
-      instanceB.init()
+    if(!instanceA || !instanceB) {
+      return
+    }
+    if(instanceA.constructor === instanceB.constructor) {
+      instanceB.state = instanceA.state
+    }
+    instanceB.init()
+  },
+  /**
+   * @param {Element} nodeA
+   * @param {Element} nodeB
+   */
+  nodeDidUpdate(nodeA, nodeB) {
+    const instanceA = nodeA.__instance
+    const instanceB = nodeB.__instance
+    if(!instanceA || !instanceB) {
+      return
+    }
+    for(const type of instanceA.__handlers.keys()) {
+      nodeA[type] = null
+    }
+    for(const type of instanceB.__handlers.keys()) {
+      nodeA[type] = nodeB[type]
+      nodeB[type] = null
     }
   },
   /**
    * @param {Element} nodeA
    * @param {Element} nodeB
    */
-  childrenWillUpdate(nodeA, nodeB) {
+  childrenDidUpdate(nodeA, nodeB) {
     const instanceA = nodeA.__instance
     const instanceB = nodeB.__instance
-    if(instanceB && instanceA) {
-      for(const type of instanceA.__handlers.keys()) {
-        nodeA[type] = null
-      }
-      for(const type of instanceB.__handlers.keys()) {
-        nodeA[type] = nodeB[type]
-        nodeB[type] = null
-      }
-      if(instanceA.constructor === instanceB.constructor) {
-        instanceB.__prevProps = instanceA.props
-      }
-      instanceB.node = nodeA
-      nodeA.__instance = instanceB
-      nodeB.__instance = null
+    if(!instanceA || !instanceB) {
+      return
     }
+    instanceB.node = nodeA
+    nodeA.__instance = instanceB
+    nodeB.__instance = null
+    if(instanceA.constructor === instanceB.constructor) {
+      instanceB.componentDidUpdate(instanceA.props, instanceB.state)
+    }
+    else instanceB.componentDidMount()
   },
   /**
-   * @param {ChildNode} nodeA
+   * @param {ChildNode|Element} nodeA
    */
-  childrenDidUpdate(nodeA) {
-    const instanceA = nodeA.__instance
-    if(instanceA) {
-      if(instanceA.__prevProps) {
-        instanceA.componentDidUpdate(instanceA.__prevProps, instanceA.state)
-        instanceA.__prevProps = null
-      }
-      else instanceA.componentDidMount()
-    }
-  },
-  /**
-   * @param {ChildNode} nodeA
-   */
-  nodeWillRemove(nodeA) {
+  nodeWillUnmount(nodeA) {
     nodeA.__instance?.destroy(true)
   },
 }
 
 
 /***/ }),
-/* 13 */
+/* 19 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const AttrType = __webpack_require__(6)
@@ -1904,21 +1952,13 @@ class Style extends AttrType
     }
     else Object.assign(elem.node.style, style)
   }
-
-  /**
-   * @param {HtmlElem} elem
-   * @returns {boolean}
-   */
-  static has(elem) {
-    return 'style' in elem.node
-  }
 }
 
 module.exports = Style
 
 
 /***/ }),
-/* 14 */
+/* 20 */
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -1927,8 +1967,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TodoMain": () => (/* binding */ TodoMain)
 /* harmony export */ });
 /* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _TodoList__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(15);
-/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(17);
+/* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(htmlmodule__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _TodoList__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(21);
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(23);
 
 
 
@@ -1954,7 +1995,7 @@ class TodoMain extends htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlSection
 
 
 /***/ }),
-/* 15 */
+/* 21 */
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -1963,7 +2004,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TodoList": () => (/* binding */ TodoList)
 /* harmony export */ });
 /* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _TodoItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
+/* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(htmlmodule__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _TodoItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(22);
 
 
 
@@ -1986,7 +2028,7 @@ class TodoList extends htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlUl
 
 
 /***/ }),
-/* 16 */
+/* 22 */
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -1995,7 +2037,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TodoItem": () => (/* binding */ TodoItem)
 /* harmony export */ });
 /* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(17);
+/* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(htmlmodule__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
 
 
 
@@ -2090,7 +2133,7 @@ class TodoItem extends htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlLi
 
 
 /***/ }),
-/* 17 */
+/* 23 */
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2153,7 +2196,7 @@ const api = window.api = new AppInteface
 
 
 /***/ }),
-/* 18 */
+/* 24 */
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2162,7 +2205,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TodoFooter": () => (/* binding */ TodoFooter)
 /* harmony export */ });
 /* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(17);
+/* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(htmlmodule__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
 
 
 
@@ -2214,7 +2258,7 @@ class TodoFooter extends htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlFooter
 
 
 /***/ }),
-/* 19 */
+/* 25 */
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2223,7 +2267,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "TodoHeader": () => (/* binding */ TodoHeader)
 /* harmony export */ });
 /* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(17);
+/* harmony import */ var htmlmodule__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(htmlmodule__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
 
 
 
@@ -2295,6 +2340,18 @@ class TodoHeader extends htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlHeader
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
