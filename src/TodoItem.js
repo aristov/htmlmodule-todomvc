@@ -3,8 +3,6 @@ import api from './api'
 
 export class TodoItem extends HtmlLi
 {
-  static className = null
-
   state = {
     busy : false,
     editing : false,
@@ -53,8 +51,14 @@ export class TodoItem extends HtmlLi
 
   save = async () => {
     const text = this._input.node.value.trim()
-    this.setState({ text, busy : true })
-    await api.updateItem({ text, id : this.props.item.id })
+    this.setState({
+      text,
+      busy : true,
+    })
+    await api.updateItem({
+      text,
+      id : this.props.item.id,
+    })
     this.setState({
       text : '',
       busy : false,

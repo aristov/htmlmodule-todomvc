@@ -3402,8 +3402,6 @@ __webpack_require__.r(__webpack_exports__);
 
 class TodoItem extends htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlLi
 {
-  static className = null
-
   state = {
     busy : false,
     editing : false,
@@ -3452,8 +3450,14 @@ class TodoItem extends htmlmodule__WEBPACK_IMPORTED_MODULE_0__.HtmlLi
 
   save = async () => {
     const text = this._input.node.value.trim()
-    this.setState({ text, busy : true })
-    await _api__WEBPACK_IMPORTED_MODULE_1__["default"].updateItem({ text, id : this.props.item.id })
+    this.setState({
+      text,
+      busy : true,
+    })
+    await _api__WEBPACK_IMPORTED_MODULE_1__["default"].updateItem({
+      text,
+      id : this.props.item.id,
+    })
     this.setState({
       text : '',
       busy : false,
