@@ -3,26 +3,26 @@ import api from './api'
 
 export class TodoItem extends HtmlLi
 {
+  static className = null
+
   state = {
     busy : false,
     editing : false,
     text : '',
   }
 
-  className = null
-
   render() {
     const item = this.props.item
-    this.class = {
-      completed : item.completed,
-      editing : this.state.editing,
-    }
+    this.classList = [
+      item.completed && 'completed',
+      this.state.editing && 'editing',
+    ]
     return [
       new HtmlDiv({
-        class : 'view',
+        className : 'view',
         children : [
           this._checkbox = new HtmlInput({
-            class : 'toggle',
+            className : 'toggle',
             type : 'checkbox',
             checked : item.completed,
             disabled : this.state.busy,
@@ -33,14 +33,14 @@ export class TodoItem extends HtmlLi
             ondblclick : this.onEdit,
           }),
           new HtmlButton({
-            class : 'destroy',
+            className : 'destroy',
             disabled : this.state.busy,
             onclick : this.onDelete,
           }),
         ],
       }),
       this._input = new HtmlInput({
-        class : 'edit',
+        className : 'edit',
         value : this.state.text || item.text,
         onkeydown : e => {
           e.code === 'Enter' && this.save()
@@ -52,7 +52,7 @@ export class TodoItem extends HtmlLi
   }
 
   save = async () => {
-    const text = this._input.value.trim()
+    const text = this._input.node.value.trim()
     this.setState({ text, busy : true })
     await api.updateItem({ text, id : this.props.item.id })
     this.setState({

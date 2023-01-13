@@ -1,7 +1,7 @@
 import { TodoApp } from './TodoApp'
 
 const render = app => {
-  app?.destroy()
+  app?.__destroy()
   return TodoApp.render({}, document.getElementById('app'))
 }
 

@@ -10,12 +10,18 @@ export class AppInteface extends EventTarget
 
   async _save() {
     localStorage.setItem('TodoApp.items', JSON.stringify(this._data))
-    await new Promise(resolve => setTimeout(resolve, DELAY))
-    this.dispatchEvent(new CustomEvent('update', { detail : this._data.slice() }))
+    await new Promise(resolve => {
+      setTimeout(resolve, DELAY)
+    })
+    this.dispatchEvent(new CustomEvent('update', {
+      detail : this._data.slice(),
+    }))
   }
 
   async getItems() {
-    return new Promise(resolve => setTimeout(() => resolve(this._data.slice()), DELAY))
+    return new Promise(resolve => {
+      setTimeout(() => resolve(this._data.slice()), DELAY)
+    })
   }
 
   async createItem(item) {

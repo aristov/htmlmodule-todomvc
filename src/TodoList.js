@@ -3,7 +3,7 @@ import { TodoItem } from './TodoItem'
 
 export class TodoList extends HtmlUl
 {
-  className = 'todo-list'
+  static className = 'todo-list'
 
   render() {
     return this.props.items.map(item => {
@@ -13,7 +13,10 @@ export class TodoList extends HtmlUl
       if(location.hash === '#/completed' && !item.completed) {
         return null
       }
-      return new TodoItem({ item, key : 'ID' + item.id })
+      return new TodoItem({
+        item,
+        key : 'ID' + item.id,
+      })
     })
   }
 }

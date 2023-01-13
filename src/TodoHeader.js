@@ -3,9 +3,12 @@ import api from './api'
 
 export class TodoHeader extends HtmlHeader
 {
-  state = { text : '', busy : false }
+  static className = 'header'
 
-  className = 'header'
+  state = {
+    text : '',
+    busy : false,
+  }
 
   render() {
     return [
@@ -14,10 +17,12 @@ export class TodoHeader extends HtmlHeader
         disabled : this.state.busy,
         required : true,
         value : this.state.text,
-        class : 'new-todo',
+        className : 'new-todo',
         placeholder : 'What needs to be done?',
         autofocus : true,
-        oninput : e => this.setState({ text : e.target.value }),
+        oninput : e => {
+          this.setState({ text : e.target.node.value })
+        },
         onkeydown : e => {
           e.code === 'Enter' && this.onSubmit(e)
         },
@@ -35,7 +40,10 @@ export class TodoHeader extends HtmlHeader
       text,
       completed : false,
     })
-    this.setState({ text : '', busy : false })
+    this.setState({
+      text : '',
+      busy : false,
+    })
     this._input.focus()
   }
 }

@@ -3,41 +3,41 @@ import api from './api'
 
 export class TodoFooter extends HtmlFooter
 {
-  className = 'footer'
+  static className = 'footer'
 
   render() {
     const items = this.props.items
     const itemsLeft = items.filter(item => !item.completed)
     return [
       new HtmlSpan({
-        class : 'todo-count',
+        className : 'todo-count',
         children : [
           new HtmlStrong(itemsLeft.length),
           itemsLeft.length === 1 ? ' item left' : ' items left',
         ],
       }),
       new HtmlUl({
-        class : 'filters',
+        className : 'filters',
         children : [
           new HtmlLi(new HtmlA({
             href : '#/',
-            class : { selected : !['#/active', '#/completed'].includes(location.hash) },
+            classList : !['#/active', '#/completed'].includes(location.hash) && 'selected',
             children : 'All',
           })),
           new HtmlLi(new HtmlA({
             href : '#/active',
-            class : { selected : location.hash === '#/active' },
+            classList : location.hash === '#/active' && 'selected',
             children : 'Active',
           })),
           new HtmlLi(new HtmlA({
             href : '#/completed',
-            class : { selected : location.hash === '#/completed' },
+            classList : location.hash === '#/completed' && 'selected',
             children : 'Completed',
           })),
         ],
       }),
       !!(items.length - itemsLeft.length) && new HtmlButton({
-        class : 'clear-completed',
+        className : 'clear-completed',
         children : 'Clear completed',
         onclick : () => api.deleteItems(
           items.filter(item => item.completed).map(item => item.id),

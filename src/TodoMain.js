@@ -4,19 +4,25 @@ import api from './api'
 
 export class TodoMain extends HtmlSection
 {
-  className = 'main'
+  static className = 'main'
 
   render() {
     return [
       new HtmlInput({
         id : 'toggle-all',
-        class : 'toggle-all',
+        className : 'toggle-all',
         type : 'checkbox',
         checked : this.props.items.every(item => item.completed),
-        onclick : e => api.updateItems({ completed : e.target.checked }),
+        onclick : e => {
+          void api.updateItems({ completed : e.target.node.checked })
+        },
       }),
-      new HtmlLabel({ htmlFor : 'toggle-all' }),
-      new TodoList({ items : this.props.items }),
+      new HtmlLabel({
+        htmlFor : 'toggle-all',
+      }),
+      new TodoList({
+        items : this.props.items,
+      }),
     ]
   }
 }

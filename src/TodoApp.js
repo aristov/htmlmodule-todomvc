@@ -6,9 +6,11 @@ import api from './api'
 
 export class TodoApp extends HtmlSection
 {
-  state = { items : [] }
+  static className = 'todoapp'
 
-  className = 'todoapp'
+  state = {
+    items : [],
+  }
 
   render() {
     const items = this.state.items
@@ -21,18 +23,22 @@ export class TodoApp extends HtmlSection
     ]
   }
 
-  async componentDidMount() {
+  async init() {
     window.onhashchange = () => this.setState()
     api.addEventListener('update', this.onUpdate)
-    this.setState({ items : await api.getItems() })
+    this.setState({
+      items : await api.getItems(),
+    })
   }
 
-  componentWillUnmount() {
+  destroy() {
     window.onhashchange = null
     api.removeEventListener('update', this.onUpdate)
   }
 
   onUpdate = e => {
-    this.setState({ items : e.detail })
+    this.setState({
+      items : e.detail,
+    })
   }
 }
